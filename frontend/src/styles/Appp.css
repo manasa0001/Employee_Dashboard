@@ -1,0 +1,230 @@
+/* Global Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  
+  body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f7fc;
+    color: #333;
+  }
+  
+  .dashboard-container {
+    display: flex;
+    height: 100vh;
+  }
+  
+  /* Sidebar Styles */
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 250px;
+    height: 100vh;
+    background-color: #2f4050;
+    color: #fff;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    box-shadow: 2px 0px 5px rgba(0, 0, 0, 0.1);
+  }
+  
+  .sidebar .logo {
+    text-align: center;
+    margin-bottom: 40px;
+  }
+  
+  .sidebar .logo h2 {
+    font-size: 24px;
+    color: #fff;
+  }
+  
+  .sidebar .nav-links {
+    list-style-type: none;
+    padding: 0;
+  }
+  
+  .sidebar .nav-links li {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    font-size: 18px;
+    cursor: pointer;
+  }
+  
+  .sidebar .nav-links li:hover {
+    background-color: #3c4a5b;
+  }
+  
+  .sidebar .nav-links li .icon {
+    margin-right: 10px;
+    font-size: 20px;
+  }
+  
+  /* Main Content Styles */
+  .main-content {
+    flex: 1;
+    margin-left: 250px; /* Sidebar width */
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .content {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+  
+  /* Top Header Styles */
+  .top-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    background-color: #fff;
+    border-bottom: 1px solid #e0e0e0;
+  }
+  
+  .top-header h2 {
+    font-size: 24px;
+  }
+  
+  .top-header .user-profile {
+    display: flex;
+    align-items: center;
+  }
+  
+  .top-header .user-profile .avatar {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    margin-right: 10px;
+  }
+  
+  .top-header .user-profile span {
+    font-size: 18px;
+    font-weight: bold;
+  }
+  
+  /* Task Summary Styles */
+  .task-summary {
+    background-color: skyblue; /* Sky blue background */
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    width: 30%;
+  }
+  
+  .task-summary h3 {
+    font-size: 20px;
+    margin-bottom: 15px;
+  }
+  
+  .task-box {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .task-card {
+    background-color: #f9f9f9;
+    padding: 15px;
+    border-radius: 8px;
+    font-size: 16px;
+    border: 1px solid #e0e0e0;
+  }
+  
+  .task-card h4 {
+    font-size: 18px;
+    margin-bottom: 5px;
+  }
+  
+  .task-card p {
+    font-size: 16px;
+    color: #777;
+  }
+  
+  .task-card:hover {
+    background-color: #f0f0f0;
+  }
+  
+  /* Attendance Summary Styles */
+  .attendance-summary {
+    background-color: lightgreen; /* Light green background */
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    width: 30%;
+  }
+  
+  .attendance-summary h3 {
+    font-size: 20px;
+    margin-bottom: 15px;
+  }
+  
+  .attendance-box {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .attendance-box p {
+    background-color: #f9f9f9;
+    padding: 15px;
+    border-radius: 8px;
+    font-size: 16px;
+    border: 1px solid #e0e0e0;
+  }
+  
+  /* Notification Styles */
+  .notifications {
+    background-color: lightcoral; /* Light maroon background */
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    width: 30%;
+  }
+  
+  .notifications h3 {
+    font-size: 20px;
+    margin-bottom: 15px;
+  }
+  
+  .notification-box {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .notification-box p {
+    background-color: #f9f9f9;
+    padding: 15px;
+    border-radius: 8px;
+    font-size: 16px;
+    border: 1px solid #e0e0e0;
+  }
+  
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    .dashboard-container {
+      flex-direction: column;
+    }
+  
+    .main-content {
+      margin-left: 0;
+    }
+  
+    .content {
+      flex-direction: column;
+      gap: 15px;
+    }
+  
+    .task-summary, .attendance-summary, .notifications {
+      width: 100%;
+    }
+  }
+  

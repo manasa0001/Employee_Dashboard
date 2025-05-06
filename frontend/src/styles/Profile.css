@@ -1,0 +1,129 @@
+/* Reset some default styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  
+  /* Profile Page */
+  .profile-page {
+    display: flex;
+    flex-direction: row;
+    height: 100vh;
+  }
+  
+  /* Sidebar */
+  .sidebar-container {
+    width: 250px;
+    background-color: #f1f1f1; /* Light grey background for sidebar */
+    height: 100vh;
+    padding: 20px;
+    position: fixed;
+  }
+  
+  .sidebar-container .sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  
+  .sidebar-container .sidebar .text-wrapper {
+    font-size: 18px;
+    color: #333;
+    cursor: pointer;
+  }
+  
+  /* Main Content Area */
+  .main-content {
+    margin-left: 250px;
+    width: calc(100% - 250px);
+    padding: 20px;
+    background-color: #f9f9f9;
+  }
+  
+  .main-content .top-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  
+  .main-content .top-heading .text-wrapper-11 {
+    font-size: 24px;
+    font-weight: bold;
+  }
+  
+  .main-content .top-heading .overlap-2 {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+  
+  .main-content .top-heading .image {
+    width: 30px;
+    height: 30px;
+    object-fit: cover;
+  }
+  
+  .profile-info {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-top: 20px;
+  }
+  
+  .profile-info h2 {
+    font-size: 22px;
+    color: #333;
+    margin-bottom: 20px;
+  }
+  
+  .profile-info .profile-detail {
+    margin-bottom: 15px;
+  }
+  
+  .profile-info .profile-detail label {
+    font-size: 16px;
+    color: #555;
+    display: block;
+    margin-bottom: 5px;
+  }
+  
+  .profile-info .profile-detail input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+  }
+  
+  .profile-info .upload-section {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+  }
+  
+  .profile-info .upload-section button {
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+  }
+  
+  .profile-info .upload-section button:hover {
+    background-color: #0056b3;
+  }
+  
+  .profile-img {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin: 0 auto;
+    display: block;
+  }
+  

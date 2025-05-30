@@ -1,4 +1,4 @@
-import User from '../models/User.js';
+import User from '../models/UsersData.js';
 import path from 'path';
 
 export const getUser = async (req, res) => {
@@ -21,7 +21,7 @@ export const updateUser = async (req, res) => {
   }
 };
 
-export const uploadProfilePic = async (req, res) => {
+/* export const uploadProfilePic = async (req, res) => {
   try {
     const { id } = req.body; 
     const filePath = `/uploads/${req.file.filename}`;  
@@ -35,4 +35,4 @@ export const uploadProfilePic = async (req, res) => {
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
-};
+}; */

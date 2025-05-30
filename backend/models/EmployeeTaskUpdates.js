@@ -20,5 +20,5 @@ const taskUpdateSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-const TaskUpdate = mongoose.model("TaskUpdate", taskUpdateSchema);
+const TaskUpdate = mongoose.model("TaskUpdate",taskUpdateSchema, "employeetasksupdates");
 export default TaskUpdate;

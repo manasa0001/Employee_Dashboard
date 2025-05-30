@@ -1,99 +1,152 @@
 
+
+// src/components/Profile.js
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import Sidebar from "./Sidebar";
 import TopHeader from "./TopHeader";
+import Sidebar from "./Sidebar";
 
 const Profile = () => {
   const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
+    name: "",
     email: "",
     phone: "",
     address: "",
     profilePic: "",
   });
-
+ const [userId, setUserId] = useState(localStorage.getItem("userId") || null);
   const [loading, setLoading] = useState(true);
-  const userId = "67fdd570214a9c9a4cc2b075";
-
+  const [error, setError] = useState("");
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  
+  // 1️⃣ Fetch “me” to get ID and initial profile data
   useEffect(() => {
-    if (!userId) return;
+    const token = localStorage.getItem("token");
+    if (!token) {
+      setError("Not authenticated");
+      return setLoading(false);
+    }
 
     axios
-      .get(`http://localhost:5000/api/users/${userId}`)
+      .get("http://localhost:5000/api/users/me", {
+        headers: { Authorization: `Bearer ${token}` },
+      })
       .then((res) => {
+        const { userId, name, email, phone, address, profilePic } =
+          res.data;
+        setUserId(userId);
         setFormData({
-          firstName: res.data.firstName || "",
-          lastName: res.data.lastName || "",
-          email: res.data.email || "",
-          phone: res.data.phone || "",
-          address: res.data.address || "",
-          profilePic: res.data.profilePic || "",
+          name : name || "",
+          email: email || "",
+          phone: phone || "",
+          address: address || "",
+          profilePic: profilePic || "",
         });
-        setLoading(false);
+        localStorage.setItem("userPic", profilePic);
       })
       .catch((err) => {
-        console.error("Error fetching user:", err);
-        setLoading(false);
-      });
-  }, [userId]);
+        console.error("Fetch /me error:", err);
+        setError("Failed to load profile");
+      })
+      .finally(() => setLoading(false));
+  }, []);
 
+  const toggleSidebar = () => {
+    setIsSidebarOpen(prev => !prev);
+  };
+
+  const closeSidebar = () => {
+    setIsSidebarOpen(false);
+  };
+
+  // 2️⃣ Update form data on input change
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleUpdate = () => {
-    if (!userId) return;
+// Updated image upload
+const handleImageUpload = (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const storedUserId = localStorage.getItem('userId');
 
-    axios
-      .put(`http://localhost:5000/api/users/${userId}`, formData)
-      .then(() => {
-        alert("User updated successfully");
-      })
-      .catch((err) => {
-        console.error("Update Error:", err);
-        alert("Update failed");
-      });
-  };
+  if (!storedUserId) {
+    alert("User not logged in. Please sign in again.");
+    return;
+  }
+  const imageData = new FormData();
+  imageData.append("profilePic", file); // 👈 Must match multer field
+  imageData.append("userId", storedUserId); // 👈 Send user ID too
 
-  const handleImageUpload = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
+  axios
+    .post("http://localhost:5000/api/auth/upload-profile-pic", imageData)
+    .then((res) => {
+      setFormData((prev) => ({
+        ...prev,
+        profilePic: `/uploads/${res.data.filename}`
+      }));
+    })
+    .catch((err) => {
+      console.error("Image upload failed:", err);
+      alert("Image upload failed");
+    });
+};
 
-    const imageData = new FormData();
-    imageData.append("image", file);
+// Updated profile update handler
+const handleUpdate = async () => {
+  if (!userId) {
+    console.warn("User ID not available for update");
+    return;
+  }
+  console.log("Attempting to update user:", userId);
+  console.log("Data:", formData);
+  setLoading(true);
 
-    axios
-      .post("http://localhost:5000/api/upload", imageData)
-      .then((res) => {
-        setFormData((prev) => ({
-          ...prev,
-          profilePic: res.data.url,
-        }));
-      })
-      .catch((err) => {
-        console.error("Image upload failed:", err);
-      });
-  };
+  const token = localStorage.getItem("token");
 
-  if (loading) return <div className="text-center p-6">Loading...</div>;
+  try {
+    const res = await axios.put(
+      `http://localhost:5000/api/users/${userId}`,
+      formData,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+    alert(res.data.message || "Updated successfully");
+  } catch (err) {
+    console.error ("Update Error:", err);
+    alert ("Update failed");
+  } finally {
+    setLoading(false);
+  }
+};
+
+  if (loading)
+    return <div className="text-center p-6">Loading profile…</div>;
+  if (error)
+    return <div className="text-center p-6 text-red-600">{error}</div>;
 
   return (
-    <div className="flex h-screen bg-white overflow-hidden">
+    <div className="relative min-h-screen w-screen bg-gray-100 flex">
       {/* Sidebar */}
-      <div className="w-64 bg-white shadow-lg shadow-blue-900">
-        <Sidebar />
-      </div>
+      <Sidebar
+              isOpen={isSidebarOpen}
+              toggleSidebar={toggleSidebar}
+              closeSidebar={closeSidebar}
+            />
 
+      <div className={`w-64 bg-white shadow-lg shadow-blue-900 ${isSidebarOpen ? "block" : "hidden"} md:block`}>
+  {/* Sidebar content */}
+</div>
       {/* Main Content */}
-      <div className="flex-1 flex flex-col">
+      <div className=" h-screen w-full flex-1 flex flex-col">
         <TopHeader
-          userName={`${formData.firstName} ${formData.lastName}`}
+          userName= {formData.name}
+          profilePic={formData.profilePic}
           pageTitle="Profile"
+          toggleSidebar={toggleSidebar}
         />
-
-        <div className="flex-1 p-6 bg-white">
+<div className="flex-1 p-6 bg-gray-100">
           {/* Profile Image */}
           <div className="flex justify-center mb-6">
             <img
@@ -114,32 +167,22 @@ const Profile = () => {
             </h2>
 
             <div className="space-y-5">
-              <div>
-                <label className="block text-gray-700 font-medium mb-1">
-                  First Name
-                </label>
-                <input
-                  type="text"
-                  name="firstName"
-                  value={formData.firstName}
-                  onChange={handleChange}
-                  className="w-full border border-gray-300 px-4 py-2 rounded focus:outline-none focus:ring focus:ring-blue-800"
-                />
-              </div>
+  {/** Name */}
+  <div>
+    <label className="block text-gray-700 font-medium mb-1">
+      Name
+    </label>
+    <input
+      type="text"
+      name="name"
+      value={formData.name}
+      onChange={handleChange}
+      className="w-full border border-gray-300 px-4 py-2 rounded focus:outline-none focus:ring focus:ring-blue-800"
+    />
+  </div>
+</div>
 
-              <div>
-                <label className="block text-gray-700 font-medium mb-1">
-                  Last Name
-                </label>
-                <input
-                  type="text"
-                  name="lastName"
-                  value={formData.lastName}
-                  onChange={handleChange}
-                  className="w-full border border-gray-300 px-4 py-2 rounded focus:outline-none focus:ring focus:ring-blue-800"
-                />
-              </div>
-
+              {/** Email */}
               <div>
                 <label className="block text-gray-700 font-medium mb-1">
                   Email
@@ -153,6 +196,7 @@ const Profile = () => {
                 />
               </div>
 
+              {/** Phone */}
               <div>
                 <label className="block text-gray-700 font-medium mb-1">
                   Phone Number
@@ -166,6 +210,7 @@ const Profile = () => {
                 />
               </div>
 
+              {/** Address */}
               <div>
                 <label className="block text-gray-700 font-medium mb-1">
                   Address
@@ -179,6 +224,7 @@ const Profile = () => {
                 />
               </div>
 
+              {/** Profile Picture Upload */}
               <div>
                 <label className="block text-gray-700 font-medium mb-1">
                   Upload Profile Picture
@@ -202,7 +248,6 @@ const Profile = () => {
           </div>
         </div>
       </div>
-    </div>
   );
 };
 

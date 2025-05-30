@@ -26,5 +26,5 @@ const employeetaskSchema = new mongoose.Schema(
   { id: false }
 );
 
-const EmployeeTask = mongoose.model("EmployeeTask", employeetaskSchema);
+const EmployeeTask = mongoose.model("EmployeeTask", employeetaskSchema,"employeetasks");
 export default EmployeeTask;

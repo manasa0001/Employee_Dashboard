@@ -5,6 +5,6 @@ const employeeSchema = new mongoose.Schema({
   password: { type: String, required: true },
   username: String,
   profilePic: { type: String, default: '' }
-}, { collection: 'employeedata' });
+}, { collection: 'employees' });
 
-export default mongoose.model('Employee', employeeSchema);
+export default mongoose.model('Employee', employeeSchema,"employees");

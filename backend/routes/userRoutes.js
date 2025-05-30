@@ -1,61 +1,76 @@
+
+// backend/routes/userRoutes.js
 import express from 'express';
 import mongoose from 'mongoose';
-import User from '../models/User.js';
-import jwt from 'jsonwebtoken';
-
+import UsersData from '../models/UsersData.js';
 const router = express.Router();
 
-router.get('/me', async (req, res) => {
-  const token = req.headers.authorization?.split(' ')[1];
-  if (!token) return res.status(401).json({ error: 'No token provided' });
-
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const user = await User.findById(decoded.id);
-    if (!user) return res.status(404).json({ error: 'User not found' });
-    res.json({ username: user.username, profilePic: user.profilePic });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Failed to authenticate token' });
-  }
-});
-
+/**
+ * GET /api/users/:id
+ * Fetch a user by their MongoDB _id.
+ */
 router.get('/:id', async (req, res) => {
   try {
     const { id } = req.params;
+
+    // 1) Validate the format of the ID
     if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(400).json({ error: 'Invalid User ID' });
+      return res.status(400).json({ error: 'Invalid user ID format' });
     }
 
-    const user = await User.findById(id);
+    // 2) Lookup the user (omit sensitive fields)
+    const user = await UsersData.findById(id)
+      .select('name email role profilePic') // include profilePic if you’ve added it
+      .lean(); // returns a plain JS object
+
+    // 3) Handle not found
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    res.json(user);
+    // 4) Return user
+    return res.json(user);
   } catch (err) {
-    console.error('GET /users/:id error:', err);
-    res.status(500).json({ error: 'Server error' });
+    console.error('Error in GET /api/users/:id:', err);
+    return res.status(500).json({ error: 'Internal Server Error' });
   }
 });
-
 router.put('/:id', async (req, res) => {
   try {
     const { id } = req.params;
+
+    // 1) Validate
     if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(400).json({ error: 'Invalid User ID' });
+      return res.status(400).json({ error: 'Invalid User ID format' });
     }
 
-    const updatedUser = await User.findByIdAndUpdate(id, req.body, { new: true });
-    if (!updatedUser) {
+    // 2) Destructure only allowed fields from body
+    const { name, email, phone, address, profilePic } = req.body;
+const updates = {
+  name,
+  email,
+  phone,
+  address,
+  profilePic
+};
+
+    // 3) Update and return the new document
+    const updated = await UsersData.findByIdAndUpdate(
+      id,
+      { $set: updates },
+      { new: true, runValidators: true, context: 'query' }
+    ).select('name email phone address profilePic');
+
+    if (!updated) {
       return res.status(404).json({ error: 'User not found for update' });
     }
-
-    res.json(updatedUser);
+    return res.json({
+      message: 'User updated successfully',
+      user: updated
+    });
   } catch (err) {
-    console.error('PUT /users/:id error:', err);
-    res.status(500).json({ error: 'Server error' });
+    console.error('Error stack:', err.stack);
+    return res.status(500).json({ error: 'Internal Server Error' });
   }
 });
-
 export default router;

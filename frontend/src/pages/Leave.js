@@ -1,27 +1,55 @@
 
+
+
 import React, { useEffect, useState } from "react";
+import TopHeader from "../components/TopHeader";
+import Sidebar from "../components/Sidebar";
 import axios from "axios";
 import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
 
 const Leave = () => {
+
   const [currentTab, setCurrentTab] = useState("request");
-  const [employeeName, setEmployeeName] = useState("Manasa");
   const [leaveType, setLeaveType] = useState("Sick Leave");
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
   const [about, setAbout] = useState("");
   const [usedLeaves] = useState(7);
   const totalLeaves = 20;
-
+const [employeeName, setEmployeeName] = useState("Manasa");
   const [notifications, setNotifications] = useState([]);
   const [unseenCount, setUnseenCount] = useState(0);
   const [showDropdown, setShowDropdown] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [username, setUsername] = useState("");
+    const [profilePic, setProfilePic] = useState("");
+    const [userId, setUserId] = useState(localStorage.getItem("userId") || null);
+const navigate = useNavigate();
+
 
   useEffect(() => {
-    const name = localStorage.getItem("employeeName") || "Manasa";
-    setEmployeeName(name);
+    const username = localStorage.getItem("username");
+    const token = localStorage.getItem("token");
+    const pic = localStorage.getItem("userPic");
+
+    if (!username || !token) {
+      navigate("/", { replace: true });
+      return;
+    }
+    setUserId(userId);
+    setUsername(username);
+    setProfilePic(pic);
     fetchNotifications();
   }, []);
+
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+  };
+
+  const closeSidebar = () => {
+    setIsSidebarOpen(false);
+  };
 
   const fetchNotifications = async () => {
     try {
@@ -68,13 +96,7 @@ const Leave = () => {
       await axios.post("http://localhost:5000/api/leaves/send-email", {
         to: "muthaipallymanasa001@gmail.com",
         subject: `Leave Request from ${employeeName}`,
-        text: `
-Leave request submitted by ${employeeName}.
-Type: ${leaveType}
-Dates: ${fromDate} to ${toDate}
-Reason: ${about}
-Request ID: ${leaveId}
-        `,
+        text: `Leave request submitted by ${employeeName}.\nType: ${leaveType}\nDates: ${fromDate} to ${toDate}\nReason: ${about}\nRequest ID: ${leaveId}`,
         employeeName,
         leaveType,
         fromDate,
@@ -95,16 +117,14 @@ Request ID: ${leaveId}
     }
   };
 
-  const boxClasses = "p-6 bg-white rounded shadow-md shadow-blue-200 transition";
+  const boxClasses = "p-6 w-max-screen h-min-screen bg-white rounded shadow-md shadow-blue-200 transition";
 
   const renderContent = () => {
     switch (currentTab) {
       case "holidays":
         return (
           <div className={boxClasses}>
-            <h2 className="text-xl font-bold text-[#233876] mb-4">
-              Holiday List — April & May
-            </h2>
+            <h2 className="text-xl font-bold text-[#233876] mb-4">Holiday List — April & May</h2>
             <ul className="list-disc pl-5 text-gray-700 space-y-2 text-sm">
               <li>14 April — Ambedkar Jayanti</li>
               <li>21 April — Mahavir Jayanti</li>
@@ -116,9 +136,7 @@ Request ID: ${leaveId}
       case "policy":
         return (
           <div className={boxClasses}>
-            <h2 className="text-xl font-bold text-[#233876] mb-4">
-              Leave Policy & Terms
-            </h2>
+            <h2 className="text-xl font-bold text-[#233876] mb-4">Leave Policy & Terms</h2>
             <ul className="list-disc pl-5 text-gray-700 space-y-2 text-sm">
               <li>20 annual leaves allowed per year.</li>
               <li>Apply at least 2 days in advance.</li>
@@ -132,6 +150,7 @@ Request ID: ${leaveId}
         return (
           <div className={boxClasses}>
             <h2 className="text-xl font-bold text-[#233876] mb-4">Leave Request</h2>
+
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label className="block font-medium mb-1">Employee Name</label>
@@ -143,7 +162,6 @@ Request ID: ${leaveId}
                   required
                 />
               </div>
-
               <div>
                 <label className="block font-medium mb-1">Leave Type</label>
                 <select
@@ -156,7 +174,6 @@ Request ID: ${leaveId}
                   <option>Paid Leave</option>
                 </select>
               </div>
-
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block font-medium mb-1">From</label>
@@ -181,7 +198,6 @@ Request ID: ${leaveId}
                   />
                 </div>
               </div>
-
               <div>
                 <label className="block font-medium mb-1">About</label>
                 <textarea
@@ -193,7 +209,6 @@ Request ID: ${leaveId}
                   required
                 />
               </div>
-
               <div className="flex justify-end gap-4">
                 <button
                   type="button"
@@ -207,10 +222,7 @@ Request ID: ${leaveId}
                 >
                   Cancel
                 </button>
-                <button
-                  type="submit"
-                  className="bg-[#233876] text-white px-4 py-2 rounded"
-                >
+                <button type="submit" className="bg-[#233876] text-white px-4 py-2 rounded">
                   Request
                 </button>
               </div>
@@ -221,122 +233,72 @@ Request ID: ${leaveId}
   };
 
   return (
-    <div className="bg-[#F5F7FA] min-h-screen p-8 font-sans text-[#1E3A8A]">
-      <div className="flex justify-between items-center mb-6 max-w-7xl mx-auto">
-        <h1 className="text-3xl font-bold">Leave Management</h1>
-        <div
-          className="relative cursor-pointer"
-          onMouseEnter={() => {
-            setShowDropdown(true);
+    <div className="fixed bg-[#F5F7FA] min-h-screen w-screen p-4 font-sans text-[#1E3A8A] relative">
+      <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} closeSidebar={closeSidebar} />
+
+      {/* Top Header */}
+      <div className="fixed top-0 left-0 right-0 z-50 transition-all duration-300">
+        <div className={`transition-all duration-300 ${isSidebarOpen ? "ml-64" : "ml-0"}`}>
+          <TopHeader
+            pageTitle="Leave Management"
+            userName={username}
+            profilePic={profilePic}
+            toggleSidebar={toggleSidebar}
+          />
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="pt-24 transition-all duration-300">
+        <div className={`transition-all duration-300 ${isSidebarOpen ? "ml-64" : "ml-0"} px-6`}>
+          {/* Used Leaves Heading */}
+          <div className="mb-6 text-center text-lg font-semibold text-[#1E3A8A]">
+            Used Leaves: {usedLeaves} / {totalLeaves}
+          </div>
+
+          {/* Tab Buttons */}
+          <div className="mb-4 flex gap-4">
+            <button
+              className={`px-4 py-2 rounded ${currentTab === "request" ? "bg-[#233876] text-white" : "bg-gray-200"}`}
+              onClick={() => setCurrentTab("request")}
+            >
+              Leave Request
+            </button>
+            <button
+              className={`px-4 py-2 rounded ${currentTab === "holidays" ? "bg-[#233876] text-white" : "bg-gray-200"}`}
+              onClick={() => setCurrentTab("holidays")}
+            >
+              Holidays
+            </button>
+            <button
+              className={`px-4 py-2 rounded ${currentTab === "policy" ? "bg-[#233876] text-white" : "bg-gray-200"}`}
+              onClick={() => setCurrentTab("policy")}
+            >
+              Leave Policy
+            </button>
+          </div>
+
+          {/* Render Section */}
+          {renderContent()}
+        </div>
+      </div>
+
+      {/* Notification Bell */}
+      <div className="fixed top-4 right-8 z-50">
+        <button
+          onClick={() => {
+            setShowDropdown(!showDropdown);
             markAsSeen();
           }}
-          onMouseLeave={() => setShowDropdown(false)}
+          className="relative p-2 rounded-full bg-[#233876] text-white hover:bg-[#1e2c72]"
         >
-          <span className="text-2xl relative">
-            🔔
-            {unseenCount > 0 && (
-              <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full px-1.5">
-                {unseenCount}
-              </span>
-            )}
-          </span>
-          {showDropdown && notifications.length > 0 && (
-            <div className="absolute right-0 mt-2 bg-white shadow-lg border rounded-md w-72 p-3 z-10">
-              <p className="font-bold mb-2">Recent Updates</p>
-              <ul className="text-sm space-y-2">
-              {notifications.map((note, idx) => (
-    <li key={idx}>
-      {/* Notification Icon */}
-      
-      {/* Dynamic message content */}
-      {note.message ? (
-        note.message
-      ) : (
-        // Default message if no custom message exists in the database
-        `${note.status.charAt(0).toUpperCase() + note.status.slice(1)} ${note.leaveType} on ${new Date(note.date).toLocaleDateString()}`
-      )}
-      </li>
-                ))}
-              </ul>
-            </div>
+          🔔
+          {unseenCount > 0 && (
+            <span className="absolute -top-1 -right-1 bg-red-600 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">
+              {unseenCount}
+            </span>
           )}
-        </div>
-      </div>
-
-      <div className="bg-white p-6 rounded shadow-md shadow-blue-200 mb-6 max-w-7xl mx-auto">
-        <p className="font-bold text-lg mb-2">Welcome back, {employeeName}</p>
-        <p className="text-sm text-gray-600">
-          You have used <strong>{usedLeaves}/{totalLeaves}</strong> leaves so far.
-        </p>
-      </div>
-
-      <div className="max-w-7xl mx-auto mb-4">
-        <div className="flex gap-4">
-          {["request", "holidays", "policy"].map((tab) => (
-            <button
-              key={tab}
-              onClick={() => setCurrentTab(tab)}
-              className={`px-4 py-2 rounded shadow ${
-                currentTab === tab
-                  ? "bg-[#233876] text-white"
-                  : "bg-white border text-[#233876]"
-              }`}
-            >
-              {tab === "request"
-                ? "Leave Request"
-                : tab === "holidays"
-                ? "List of Holidays"
-                : "Leave Policy"}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      <div className="flex flex-col lg:flex-row gap-8 max-w-7xl mx-auto">
-        <div className="lg:w-2/3">{renderContent()}</div>
-
-        <div className="lg:w-1/3 space-y-6">
-          <div className="p-4 bg-white rounded shadow-md shadow-blue-200">
-            <h3 className="font-semibold mb-2">Recent Notifications</h3>
-            {notifications.length === 0 ? (
-              <p className="text-sm text-gray-600">No updates yet.</p>
-            ) : (
-              notifications.slice(0, 3).map((note, idx) => (
-                <div
-  key={idx}
-  className={`p-2 rounded mb-2 text-sm ${
-    note.status === "approved"
-      ? "bg-blue-50 text-green-700"
-      : note.status === "rejected"
-      ? "bg-red-50 text-red-700"
-      : "bg-yellow-50 text-yellow-700"
-  }`}
->
-  
-  {note.message}
-</div>
-
-              ))
-            )}
-          </div>
-
-          <div className="p-4 bg-white rounded shadow-md shadow-blue-200">
-            <h3 className="font-semibold mb-2">Leave Overview</h3>
-            <div className="flex flex-col items-center mb-3">
-              <div className="w-24 h-24 rounded-full border-8 border-teal-400 flex flex-col items-center justify-center text-lg font-bold">
-                {usedLeaves}
-                <span className="text-xs font-normal">leaves taken</span>
-              </div>
-              <p className="mt-3 text-sm text-center text-gray-600">
-                Sick: 2 &nbsp; | &nbsp; Casual: 1 &nbsp; | &nbsp; Paid: 0
-              </p>
-            </div>
-            <div className="text-sm flex justify-between">
-              <span>Used — {usedLeaves}</span>
-              <span>Remaining — {totalLeaves - usedLeaves}</span>
-            </div>
-          </div>
-        </div>
+        </button>
       </div>
     </div>
   );

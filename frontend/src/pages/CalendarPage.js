@@ -1,9 +1,11 @@
 
-import React, { useState } from 'react';
+import React, { useEffect,useState } from 'react';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
+import Sidebar from '../components/Sidebar.js';
+import TopHeader from '../components/TopHeader.js';
+import { useNavigate } from "react-router-dom";
 
-// Sample Events and Tasks
 const sampleEvents = [
   { date: '2025-04-10', type: 'Holiday' },
   { date: '2025-04-15', type: 'Meeting' },
@@ -15,70 +17,61 @@ const sampleTasks = [
   { task: 'Old Task', deadline: '2025-04-20', status: 'Completed' },
 ];
 
-// Sample Meetings
 const latestMeetings = [
   { title: 'Team Sync-up', date: '2025-05-04', time: '10:00 AM' },
   { title: 'Client Presentation', date: '2025-05-05', time: '2:00 PM' },
   { title: 'Product Review', date: '2025-05-06', time: '11:30 AM' },
 ];
 
-// 📅 Calendar View
 const CalendarView = ({ events }) => {
   const [date, setDate] = useState(new Date());
-
+   
   const renderTileContent = ({ date }) => {
     const dayEvent = events.find(
       (event) => new Date(event.date).toDateString() === date.toDateString()
     );
     return dayEvent ? (
-      <p className="text-xs text-blue-600 font-semibold">{dayEvent.type}</p>
+      <p className="text-xs text-[#233876] font-semibold">{dayEvent.type}</p>
     ) : null;
   };
 
   return (
-    <div className="bg-white rounded-xl shadow p-4 w-full">
-      <div className="text-lg font-semibold mb-2 text-center">April 2025</div>
+    <div className="bg-white rounded-xl shadow p-4 w-full ">
+      <div className="text-lg font-semibold mb-2 text-center">Calendar</div>
       <Calendar
         value={date}
         onChange={setDate}
         tileContent={renderTileContent}
-        className="w-full"
+        className="w-full ml-40"
       />
     </div>
   );
 };
 
-// 🎯 Header with Search and Button
 const MeetingSchedulerHeader = () => {
   return (
     <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-4">
-      <h1 className="text-2xl font-bold text-gray-800 w-full sm:w-auto">📅 Calendar</h1>
+      <button className="px-4 py-2 w-1/2 bg-[#233876] text-white rounded-md hover:bg-blue-900">
+          Schedule Meeting
+        </button>
       <div className="flex w-full sm:w-[70%] gap-2">
         <input
           type="text"
           placeholder="Search..."
-          className="flex-grow px-4 py-2 border border-gray-300 rounded-md shadow-sm"
+          className="flex-grow px-4 py-2 w-full border border-gray-300 rounded-md shadow-sm"
         />
-        <button className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 whitespace-nowrap">
-          Schedule Meeting
-        </button>
       </div>
     </div>
   );
 };
 
-// 📋 Side Panel with inline latest meetings
 const SidePanel = () => {
   return (
-    <div className="bg-white rounded-xl shadow p-4 w-full">
-      <div className="text-xl font-bold text-gray-800 mb-4">Calendar & Schedule</div>
-
-      <button
-        className="w-full text-left px-4 py-2 rounded-lg bg-purple-100 text-purple-800 hover:brightness-110 font-medium shadow-sm transition mb-2"
-      >
+    <div className="w-full bg-white rounded-xl shadow p-4">
+      <div className="text-xl font-bold text-gray-800 mb-2">Calendar & Schedule</div>
+      <button className="w-full text-left px-4 py-2 rounded-lg bg-purple-100 text-purple-800 hover:brightness-110 font-medium shadow-sm transition mb-2">
         📅 Meetings
       </button>
-
       <div className="space-y-2 mt-3">
         {latestMeetings.map((meeting, index) => (
           <div key={index} className="bg-gray-100 p-3 rounded-lg shadow-sm">
@@ -91,7 +84,6 @@ const SidePanel = () => {
   );
 };
 
-// ✅ Task Table
 const TaskTable = ({ tasks }) => {
   const today = new Date().toISOString().split('T')[0];
   const filteredTasks = tasks.filter((task) => task.deadline === today);
@@ -108,7 +100,6 @@ const TaskTable = ({ tasks }) => {
     if (editedStatuses[index]) {
       updatedTasks[index].status = editedStatuses[index];
       setTaskList(updatedTasks);
-
       const newEdits = { ...editedStatuses };
       delete newEdits[index];
       setEditedStatuses(newEdits);
@@ -163,20 +154,51 @@ const TaskTable = ({ tasks }) => {
   );
 };
 
-// 📦 Calendar Page
 const CalendarPage = () => {
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+   const [username, setUsername] = useState("");
+    const [profilePic, setProfilePic] = useState("");
+  const [userId, setUserId] = useState(localStorage.getItem("userId") || null);
+const navigate = useNavigate();
+
+   useEffect(() => {
+      const username = localStorage.getItem("username");
+      const token = localStorage.getItem("token");
+      const pic = localStorage.getItem("userPic");
+  
+      if (!username || !token) {
+        navigate("/", { replace: true });
+        return;
+      }
+      setUserId(userId);
+      setUsername(username);
+      setProfilePic(pic);
+    }, []);
+
+  const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
+  const closeSidebar = () => setIsSidebarOpen(false);
+
+
+
   return (
-    <div className="p-6 bg-gray-100 min-h-screen">
-      <MeetingSchedulerHeader />
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="md:col-span-2 space-y-4">
-          <CalendarView events={sampleEvents} />
-        </div>
-        <div>
-          <SidePanel />
+    <div className="min-h-screen w-screen bg-gray-100 flex">
+      <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} closeSidebar={closeSidebar} />
+      <div className={`flex-1 transition-all duration-300 ${isSidebarOpen ? 'ml-64' : 'ml-0'}`}>
+        <TopHeader pageTitle="Calendar" userName={username} profilePic={profilePic} toggleSidebar={toggleSidebar} />
+        {/* Wrapper for page content with centered margins */}
+        <div className="max-w-7xl mx-auto p-4 sm:p-6">
+          <MeetingSchedulerHeader />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="md:col-span-2 space-y-4">
+              <CalendarView events={sampleEvents} />
+            </div>
+            <div>
+              <SidePanel />
+            </div>
+          </div>
+          <TaskTable tasks={sampleTasks} />
         </div>
       </div>
-      <TaskTable tasks={sampleTasks} />
     </div>
   );
 };

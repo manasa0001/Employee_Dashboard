@@ -12,6 +12,7 @@ import employeeAuthRoutes from './routes/employeeAuth.js';
 import taskRoutes from './routes/taskRoutes.js';
 import leaveRoutes from './routes/leaveRoutes.js';
 import connectDB from './config/db.js';
+import authRoutes from './routes/authRoutes.js';
 
 dotenv.config();
 const app = express();
@@ -25,10 +26,12 @@ app.use(cors());
 app.use(express.json());
 
 // Static files
-app.use('/api/uploads', express.static("uploads"));
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
+
 // Routes
+app.use('/api/auth', authRoutes);
+app.use('/api/users', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/employees', employeeAuthRoutes);
 app.use('/api/tasks', taskRoutes);
@@ -58,7 +61,7 @@ app.put('/api/users/:userId', (req, res) => {
   const updateData = req.body;
 
   // Use Mongoose's findByIdAndUpdate to find the user and update their data
-  User.findByIdAndUpdate(userId, updateData, { new: true, runValidators: true })
+  UsersData.findByIdAndUpdate(userId, updateData, { new: true, runValidators: true })
     .then((updatedUser) => {
       if (!updatedUser) {
         return res.status(404).json({ message: 'User not found' });

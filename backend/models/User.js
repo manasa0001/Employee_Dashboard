@@ -9,4 +9,4 @@ const userSchema = new mongoose.Schema({
   profilePic: { type: String, default: '' },  
 });
 
-export default mongoose.model('User', userSchema);
+export default mongoose.model('User', userSchema, "users");

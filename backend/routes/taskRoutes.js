@@ -1,13 +1,15 @@
-
 import express from "express";
 import multer from "multer";
 import path from "path";
+import mongoose from "mongoose"; // ✅ Added this import
 import EmployeeTask from "../models/EmployeeTask.js";
 import TaskUpdate from "../models/EmployeeTaskUpdates.js";
+import ActivityModel from "../models/Activity.js"; // <-- Make sure this path is correct
+
 
 const router = express.Router();
 
-// ---------------- Multer Setup for File Uploads ----------------
+// Multer storage setup remains the same
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, "./uploads/");
@@ -16,105 +18,156 @@ const storage = multer.diskStorage({
     cb(null, `${Date.now()}_${file.originalname}`);
   },
 });
-
 const upload = multer({ storage });
 
-// ---------------- Fetch All Tasks (with Updates) ----------------
-router.get("/tasks", async (req, res) => {
+// Fetch tasks
+router.get("/", async (req, res) => {
   try {
-    const employeeId = req.user.id;
+    const rawUserId = req.user?.id || req.query.userId;
+    console.log("Incoming userId:", rawUserId);
 
-    const assignedTasks = await EmployeeTask.find({ assignee: employeeId });
+    if (!rawUserId) {
+      console.log("No userId provided!");
+      return res.status(400).json({ message: "User ID is required" });
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(rawUserId)) {
+      console.log("Invalid ObjectId!");
+      return res.status(400).json({ message: "Invalid User ID format" });
+    }
+
+    const userId = new mongoose.Types.ObjectId(rawUserId);
+    console.log("Fetching tasks for userId:", userId);
+
+    const assignedTasks = await EmployeeTask.find({ userId });
+    console.log("Found assignedTasks:", assignedTasks);
 
     const tasksWithUpdates = await Promise.all(
       assignedTasks.map(async (task) => {
         const taskUpdate = await TaskUpdate.findOne({ taskId: task._id });
+        console.log("Task:", task._id, "Update:", taskUpdate);
 
-        if (taskUpdate) {
-          return {
-            _id: task._id,
-            title: taskUpdate.title || task.title,
-            description: task.description,
-            status: taskUpdate.progress || task.status,
-            assignee: task.assignee,
-            team: task.team,
-            startDate: task.startDate,
-            endDate: task.endDate,
-            reporter: task.reporter,
-            attachments: [...(task.attachments || []), ...(taskUpdate.uploads || [])],
-            comments: [...(task.comments || []), ...(taskUpdate.comments || [])],
-            priority: taskUpdate.priority,
-            deadline: taskUpdate.deadline,
-          };
-        } else {
-          return {
-            _id: task._id,
-            title: task.title,
-            description: task.description,
-            status: task.status,
-            assignee: task.assignee,
-            team: task.team,
-            startDate: task.startDate,
-            endDate: task.endDate,
-            reporter: task.reporter,
-            attachments: task.attachments || [],
-            comments: task.comments || [],
-            priority: null,
-            deadline: null,
-          };
-        }
+        return {
+          _id: task._id,
+          title: taskUpdate?.title || task.title,
+          description: task.description,
+          status: taskUpdate?.progress || task.status,
+          assignee: task.assignee,
+          team: task.team,
+          startDate: task.startDate,
+          endDate: task.endDate,
+          reporter: task.reporter,
+          attachments: [...(task.attachments || []), ...(taskUpdate?.uploads || [])],
+          comments: [...(task.comments || []), ...(taskUpdate?.comments || [])],
+          priority: task.priority || null,
+          deadline: task.deadline || null,
+        };
       })
     );
 
     res.json(tasksWithUpdates);
   } catch (error) {
-    console.error("Error fetching tasks:", error);
-    res.status(500).json({ message: "Internal server error" });
+    console.error("Error fetching tasks:", error.stack || error);
+    res.status(500).json({
+      message: "Internal server error",
+      error: error.message,
+      stack: error.stack
+    });
   }
 });
+
+// other routes remain unchanged...
 
 // ---------------- Update/Save Task Update ----------------
 router.put("/tasks/:taskId", async (req, res) => {
   try {
     const { taskId } = req.params;
-    const { title, priority, deadline, progress } = req.body;
+    const { title, deadline, priority, progress, comments, uploads } = req.body;
 
-    const originalTask = await EmployeeTask.findById(taskId);
-    if (!originalTask) {
+    // 1️⃣ Find the main task first
+    const task = await EmployeeTask.findById(taskId);
+    if (!task) {
       return res.status(404).json({ message: "Task not found" });
     }
 
-    let taskUpdate = await TaskUpdate.findOne({ taskId });
+    // 2️⃣ Update the main task selectively
+    if (title) task.title = title;
+    if (deadline) task.deadline = deadline;
+    if (priority) task.priority = priority;
+    if (progress) task.progress = progress;
 
-    if (!taskUpdate) {
-      taskUpdate = new TaskUpdate({
-        taskId,
-        title,
-        priority,
-        deadline,
-        progress,
-      });
-    } else {
-      taskUpdate.title = title || taskUpdate.title;
-      taskUpdate.priority = priority || taskUpdate.priority;
-      taskUpdate.deadline = deadline || taskUpdate.deadline;
-      taskUpdate.progress = progress || taskUpdate.progress;
-    }
+    await task.save();
+
+    // 3️⃣ Create a snapshot in TaskUpdate (append a new update log)
+    const taskUpdate = new TaskUpdate({
+      taskId,
+      title: task.title,
+      deadline: task.deadline,
+      priority: task.priority,
+      progress: task.progress,
+      comments: comments ? comments.map((c) => ({
+        user: c.user,
+        text: c.text,
+      })) : [],
+      uploads: uploads || [],
+    });
 
     await taskUpdate.save();
 
-    res.json({ message: "Task updated successfully", taskUpdate });
+    res.json({
+      message: "Task updated successfully",
+      task,
+      taskUpdate,
+    });
   } catch (error) {
     console.error("Error updating task:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 });
-
 // ---------------- Add Comment to Task ----------------
-router.post("/tasks/:taskId/comments", async (req, res) => {
+router.put("/:taskId/status", async (req, res) => {
   try {
     const { taskId } = req.params;
-    const { text } = req.body;
+    const { status, userId } = req.body;
+
+    if (!["To Do", "In Progress", "Completed"].includes(status)) {
+      return res.status(400).json({ message: "Invalid status value" });
+    }
+
+    const task = await EmployeeTask.findById(taskId);
+    if (!task) {
+      return res.status(404).json({ message: "Task not found" });
+    }
+
+    task.status = status;
+    await task.save();
+
+    await TaskUpdate.findOneAndUpdate(
+      { taskId },
+      { progress: status },
+      { upsert: true, new: true }
+    );
+
+    // ✅ Log activity
+    await ActivityModel.create({
+      userId,
+      taskId,
+      action: "status_update",
+      newStatus: status,
+      timestamp: Date.now(),
+    });
+
+    res.json({ message: "Status updated successfully", task });
+  } catch (error) {
+    console.error("Error updating status:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+ 
+router.post("/:taskId/comments", async (req, res) => {
+  try {
+    const { taskId } = req.params;
+    const { text, user, userId } = req.body;
 
     if (!text) {
       return res.status(400).json({ message: "Comment text is required" });
@@ -125,13 +178,22 @@ router.post("/tasks/:taskId/comments", async (req, res) => {
     if (!taskUpdate) {
       taskUpdate = new TaskUpdate({
         taskId,
-        comments: [{ user: req.user.name, text }],
+        comments: [{ user, text, createdAt: new Date() }],
       });
     } else {
-      taskUpdate.comments.push({ user: req.user.name, text });
+      taskUpdate.comments.push({ user, text, createdAt: new Date() });
     }
 
     await taskUpdate.save();
+
+    // ✅ Log Activity
+    await ActivityModel.create({
+      userId,
+      taskId,
+      action: "comment_added",
+      taskTitle: taskUpdate?.title,
+      timestamp: Date.now(),
+    });
 
     res.json({ message: "Comment added successfully", taskUpdate });
   } catch (error) {
@@ -140,33 +202,94 @@ router.post("/tasks/:taskId/comments", async (req, res) => {
   }
 });
 
-// ---------------- Upload File to Task ----------------
-router.post("/tasks/:taskId/uploads", upload.single("file"), async (req, res) => {
+
+// Upload file to task
+router.post("/:taskId/attachments", upload.single("file"), async (req, res) => {
   try {
     const { taskId } = req.params;
+    const { userId } = req.body;
 
     if (!req.file) {
       return res.status(400).json({ message: "No file uploaded" });
     }
 
+    const filePath = `/uploads/${req.file.filename}`;
     let taskUpdate = await TaskUpdate.findOne({ taskId });
 
     if (!taskUpdate) {
-      taskUpdate = new TaskUpdate({
-        taskId,
-        uploads: [`/uploads/${req.file.filename}`],
-      });
+      taskUpdate = new TaskUpdate({ taskId, uploads: [filePath] });
     } else {
-      taskUpdate.uploads.push(`/uploads/${req.file.filename}`);
+      taskUpdate.uploads.push(filePath);
     }
 
     await taskUpdate.save();
 
-    res.json({ message: "File uploaded successfully", taskUpdate });
+    // ✅ Log Activity
+    await ActivityModel.create({
+      userId,
+      taskId,
+      action: "file_upload",
+      filename: req.file.originalname,
+      timestamp: Date.now(),
+    });
+
+    res.json({
+      message: "File uploaded successfully",
+      filePath,
+      taskUpdate,
+    });
   } catch (error) {
     console.error("Error uploading file:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 });
+router.delete("/:taskId/attachments", async (req, res) => {
+  try {
+    const { taskId } = req.params;
+    const { fileUrl, userId } = req.body;
+
+    if (!fileUrl) {
+      return res.status(400).json({ message: "File URL required" });
+    }
+
+    let taskUpdate = await TaskUpdate.findOne({ taskId });
+    if (!taskUpdate) {
+      return res.status(404).json({ message: "Task update not found" });
+    }
+
+    taskUpdate.uploads = taskUpdate.uploads.filter(url => url !== fileUrl);
+    await taskUpdate.save();
+
+    // ✅ Log Activity
+    await ActivityModel.create({
+      userId,
+      taskId,
+      action: "file_delete",
+      filename: fileUrl.split('/').pop(),
+      timestamp: Date.now(),
+    });
+
+    res.json({ message: "Attachment deleted successfully", taskUpdate });
+  } catch (err) {
+    console.error("Error deleting file:", err);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+
+// In your backend routes file
+// In your backend routes file
+router.get('/activity', async (req, res) => {
+  try {
+    const { userId } = req.query;
+    const activities = await ActivityModel.find({ userId })
+      .sort({ timestamp: -1 })
+      .limit(10);
+    res.json(activities);
+  } catch (err) {
+    res.status(500).json({ message: 'Server error' });
+  }
+});
 
 export default router;
+ 

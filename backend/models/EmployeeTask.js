@@ -1,30 +1,80 @@
 
 import mongoose from "mongoose";
 
-const employeetaskSchema = new mongoose.Schema(
+const commentSchema = new mongoose.Schema({
+  user: { type: String, required: true },
+  text: { type: String, required: true },
+  createdAt: { type: Date, default: Date.now }
+});
+
+const employeeTaskSchema = new mongoose.Schema(
   {
-    title: String,
-    description: String,
-    status: String,
-    assignee: { type: mongoose.Schema.Types.ObjectId, ref: "Employee" }, 
-    team: String,
-    startDate: { type: Date },
-    endDate: { type: Date },
-    reporter: String,
-    attachments: [String],
-    comments: [
-      {
-        user: String,
-        text: String,
-        createdAt: {
-          type: Date,
-          default: Date.now,
-        },
-      },
-    ],
+    userId: { 
+      type: mongoose.Schema.Types.ObjectId, 
+      ref: "User", 
+      required: true 
+    }, // Reference to employee
+
+    title: { 
+      type: String, 
+      required: true 
+    },
+
+    description: { 
+      type: String, 
+      default: "" 
+    },
+
+    status: { 
+      type: String, 
+      enum: ["To Do", "In Progress", "Completed"], 
+      default: "To Do" 
+    },
+
+    assignee: { 
+      type: String, 
+      required: true 
+    }, // Employee name (can later refactor to use userId reference)
+
+    team: { 
+      type: String, 
+      default: "" 
+    },
+
+    startDate: { 
+      type: Date 
+    },
+
+    endDate: { 
+      type: Date 
+    },
+
+    priority: { 
+      type: String, 
+      enum: ["Low", "Medium", "High"], 
+      default: "Medium" 
+    },
+
+    deadline: { 
+      type: Date 
+    },
+
+    reporter: { 
+      type: String, 
+      default: "" 
+    },
+
+    attachments: [String], // Array of file paths
+
+    comments: [commentSchema]
   },
   { id: false }
 );
 
-const EmployeeTask = mongoose.model("EmployeeTask", employeetaskSchema,"employeetasks");
+const EmployeeTask = mongoose.model(
+  "EmployeeTask", 
+  employeeTaskSchema, 
+  "employeetasks"
+);
+
 export default EmployeeTask;

@@ -13,6 +13,7 @@ import taskRoutes from './routes/taskRoutes.js';
 import leaveRoutes from './routes/leaveRoutes.js';
 import connectDB from './config/db.js';
 import authRoutes from './routes/authRoutes.js';
+import attendanceRoutes from './routes/attendanceRoutes.js';
 
 dotenv.config();
 const app = express();
@@ -36,6 +37,8 @@ app.use('/api/users', userRoutes);
 app.use('/api/employees', employeeAuthRoutes);
 app.use('/api/tasks', taskRoutes);
 app.use('/api/leaves', leaveRoutes);
+app.use('/api/attendance', attendanceRoutes);
+
 
 // Multer configuration
 const storage = multer.diskStorage({

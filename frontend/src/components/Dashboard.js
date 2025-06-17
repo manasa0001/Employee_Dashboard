@@ -23,14 +23,14 @@ const Dashboard = () => {
 const [profilePic, setProfilePic] = useState("");
 const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-
   const navigate = useNavigate();
 
   useEffect(() => {
+
     const username = localStorage.getItem("username");
     const token = localStorage.getItem("token");
     const pic = localStorage.getItem('userPic');
-   
+  
 
     if (!username || !token) {
       navigate("/", { replace: true });

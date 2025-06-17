@@ -139,15 +139,6 @@ const Signin = () => {
               className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-800"
             />
 
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                checked={showPassword}
-                onChange={() => setShowPassword(!showPassword)}
-                className="mr-2"
-              />
-              <label className="text-sm text-gray-600">Show Password</label>
-            </div>
 
             <button
               type="submit"

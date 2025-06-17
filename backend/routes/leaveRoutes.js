@@ -8,7 +8,7 @@ import LeaveUpdate from "../models/LeaveUpdate.js";
 dotenv.config();
 const router = express.Router();
 
-const BASE_URL = "http://192.168.1.8:5000";  // adjust to your IP/port
+const BASE_URL = "http://192.168.1.4:5000";  // adjust to your IP/port
 
 // helper to get a transporter
 function makeTransporter() {

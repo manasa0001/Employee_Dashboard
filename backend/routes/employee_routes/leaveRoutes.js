@@ -2,8 +2,8 @@
 import express from "express";
 import nodemailer from "nodemailer";
 import dotenv from "dotenv";
-import Leave from "../models/Leave.js";
-import LeaveUpdate from "../models/LeaveUpdate.js";
+import Leave from "../../models/employee_models/Leave.js";
+import LeaveUpdate from "../../models/employee_models/LeaveUpdate.js";
 
 dotenv.config();
 const router = express.Router();

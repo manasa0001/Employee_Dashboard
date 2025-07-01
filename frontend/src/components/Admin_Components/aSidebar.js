@@ -1,43 +1,33 @@
-
-// Sidebar.jsx (as you provided, no changes)
 import React from "react";
-import {
-  FaHome,
-  FaCalendarAlt,
-  FaClock,
-  FaHouseUser,
-  FaTasks,
-  FaTools,
-  FaUser,
-  FaSignOutAlt,
-  FaBars,
+import { 
+  FaHome, FaUsers, FaProjectDiagram, FaTasks, 
+  FaTools, FaSignOutAlt, FaBars, FaTimes 
 } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
 
 const Sidebar = ({ isOpen, toggleSidebar, closeSidebar }) => {
   const navigate = useNavigate();
   const isAdmin = localStorage.getItem("userRole")?.toLowerCase() === "admin";
-  const dashboardLink = isAdmin ? "/admin/dashboard" : "/employee/dashboard";
 
   const handleSignout = () => {
     localStorage.clear();
-    window.location.href = "/";
+    navigate('/signin');
   };
 
   return (
     <>
-      {/* Hamburger icon visible only on small screens */}
-      <button
-        onClick={toggleSidebar}
-        className="fixed top-4 left-4 z-50 bg-blue-800 text-white p-2 rounded md:hidden"
-      >
-        <FaBars size={20} />
-      </button>
+      {/* Overlay for mobile */}
+      {isOpen && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 z-20 lg:hidden"
+          onClick={closeSidebar}
+        />
+      )}
 
       {/* Sidebar */}
-      <div
+      <div 
         className={`fixed top-0 left-0 h-screen bg-blue-950 text-white z-40 transition-all duration-300 ease-in-out ${
-          isOpen ? "w-64" : "w-0"
+          isOpen ? 'w-64' : 'w-0'
         } overflow-hidden`}
       >
         {/* Header */}
@@ -48,13 +38,36 @@ const Sidebar = ({ isOpen, toggleSidebar, closeSidebar }) => {
         {/* Links */}
         <div className="flex flex-col justify-between h-[calc(100%-4rem)] p-4">
           <ul className="space-y-4 text-lg">
-            <SidebarLink to={dashboardLink} icon={<FaHome />} label="Dashboard" closeSidebar={closeSidebar} />
-            <SidebarLink to="/profile" icon={<FaUser />} label="Profile" closeSidebar={closeSidebar} />
-            <SidebarLink to="/calendar" icon={<FaCalendarAlt />} label="Calendar" closeSidebar={closeSidebar} />
-            <SidebarLink to="/attendance" icon={<FaClock />} label="Attendance" closeSidebar={closeSidebar} />
-            <SidebarLink to="/leave" icon={<FaHouseUser />} label="Leave" closeSidebar={closeSidebar} />
-            <SidebarLink to="/tasks" icon={<FaTasks />} label="Tasks" closeSidebar={closeSidebar} />
-            <SidebarLink to="/settings" icon={<FaTools />} label="Settings" closeSidebar={closeSidebar} />
+            <SidebarLink 
+              to="/" 
+              icon={<FaHome />} 
+              label="Dashboard" 
+              closeSidebar={closeSidebar} 
+            />
+            <SidebarLink 
+              to="/proofile" 
+              icon={<FaUsers />} 
+              label="User Management" 
+              closeSidebar={closeSidebar} 
+            />
+            <SidebarLink 
+              to="/projects" 
+              icon={<FaProjectDiagram />} 
+              label="Project Management" 
+              closeSidebar={closeSidebar} 
+            />
+            <SidebarLink 
+              to="/taasks" 
+              icon={<FaTasks />} 
+              label="Task Management" 
+              closeSidebar={closeSidebar} 
+            />
+            <SidebarLink 
+              to="/settings" 
+              icon={<FaTools />} 
+              label="Settings" 
+              closeSidebar={closeSidebar} 
+            />
           </ul>
 
           {/* Sign Out */}
@@ -68,6 +81,14 @@ const Sidebar = ({ isOpen, toggleSidebar, closeSidebar }) => {
           </div>
         </div>
       </div>
+
+      {/* Hamburger icon visible only on small screens */}
+      <button
+        onClick={toggleSidebar}
+        className="fixed top-4 left-4 z-50 bg-blue-800 text-white p-2 rounded md:hidden"
+      >
+        <FaBars size={20} />
+      </button>
     </>
   );
 };

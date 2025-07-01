@@ -6,12 +6,18 @@ const userSchema = new mongoose.Schema({
   email: { type: String, unique: true },
   password: String,
   role: { type: String, enum: ['admin', 'employee'], default: 'employee' },
-  phone: { type : String, default: ''},
-  address: { type: String, default: ''},
+  phone: { type: String, default: '' },
+  address: { type: String, default: '' },
   profilePic: {
     type: String,
-    default: '', // or a default image URL
+    default: '', // default image URL if neseded
+  },
+  // ✅ Notification Preferences
+  notificationPreferences: {
+    emailNotifications: { type: Boolean, default: true },
+    smsNotifications: { type: Boolean, default: false },
   }
 });
 
-export default mongoose.model ('UsersData', userSchema,"usersdata");
+export default mongoose.model('UsersData', userSchema, 'usersdata');
+

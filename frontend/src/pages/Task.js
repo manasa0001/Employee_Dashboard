@@ -3,8 +3,8 @@
 import axios from "axios";
 import { FaArrowDown, FaTrash, FaPaperclip, FaCheckCircle, FaTimes, FaImage } from "react-icons/fa";
 import { PieChart, Pie, Cell, Legend, ResponsiveContainer, Tooltip } from "recharts";
-import TopHeader from "../components/TopHeader";
-import Sidebar from "../components/Sidebar";
+import TopHeader from '../components/Employee_Components/TopHeader'; 
+import Sidebar from '../components/Employee_Components/Sidebar'; 
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";

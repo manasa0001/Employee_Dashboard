@@ -1,5 +1,5 @@
 import express from 'express';
-import Employee from '../models/Employee.js';
+import Employee from '../../models/employee_models/Employee.js';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 

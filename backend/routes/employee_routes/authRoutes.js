@@ -2,9 +2,9 @@
 import express from 'express';
 import mongoose from 'mongoose';
 import jwt from 'jsonwebtoken';
-import UsersData from '../models/UsersData.js';
-import { register, login, uploadProfilePic} from '../controllers/authController.js';
-import upload  from '../middleware/multerConfig.js';
+import UsersData from '../../models/UsersData.js';
+import { register, login, uploadProfilePic} from '../../controllers/employee_controller/authController.js';
+import upload  from '../../middleware/multerConfig.js';
 const router = express.Router();
 
 router.post('/register', register);

@@ -1,6 +1,6 @@
 
 import express from 'express';
-import Attendance from '../models/Attendance.js';
+import Attendance from '../../models/employee_models/Attendance.js';
 
 const router = express.Router();
 

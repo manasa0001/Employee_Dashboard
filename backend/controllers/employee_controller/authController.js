@@ -1,7 +1,7 @@
 
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import UsersData from '../models/UsersData.js'; // Adjust path if needed
+import UsersData from '../../models/UsersData.js'; // Adjust path if needed
 import dotenv from 'dotenv';
 dotenv.config();
 

@@ -1,9 +1,9 @@
-import User from '../models/UsersData.js';
+import UsersData from '../../models/UsersData.js';
 import path from 'path';
 
 export const getUser = async (req, res) => {
   try {
-    const user = await User.findById(req.params.id);  
+    const user = await UsersData.findById(req.params.id);  
     if (!user) return res.status(404).json({ message: 'User not found' });
     res.json(user);
   } catch (err) {
@@ -13,7 +13,7 @@ export const getUser = async (req, res) => {
 
 export const updateUser = async (req, res) => {
   try {
-    const updatedUser = await User.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const updatedUser = await UsersData.findByIdAndUpdate(req.params.id, req.body, { new: true });
     if (!updatedUser) return res.status(404).json({ message: 'User not found' });
     res.json(updatedUser);
   } catch (err) {

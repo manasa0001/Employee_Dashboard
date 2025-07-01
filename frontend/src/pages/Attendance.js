@@ -6,8 +6,8 @@ import { Clock, Search } from 'lucide-react';
 import axios from 'axios';
 import { useNavigate } from "react-router-dom";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import TopHeader from "../components/TopHeader";
-import Sidebar from "../components/Sidebar";
+import TopHeader from '../components/Employee_Components/TopHeader'; 
+import Sidebar from '../components/Employee_Components/Sidebar'; 
 
 const Attendance = () => {
   const [isLoading, setIsLoading] = useState(false);

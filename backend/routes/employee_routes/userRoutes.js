@@ -2,13 +2,20 @@
 // backend/routes/userRoutes.js
 import express from 'express';
 import mongoose from 'mongoose';
-import UsersData from '../models/UsersData.js';
+import UsersData from '../../models/UsersData.js';
 const router = express.Router();
+import { changePassword, updateNotificationSettings } from '../../controllers/employee_controller/userSettingsController.js';
+import authMiddleware from '../../middleware/authMiddleware.js';
 
 /**
  * GET /api/users/:id
- * Fetch a user by their MongoDB _id.
+ * Fetch a user by their MongoDB _id.s
  */
+router.put('/change-password', authMiddleware, changePassword);
+
+// Update notification preferences
+router.put('/notification-settings', authMiddleware, updateNotificationSettings);
+
 router.get('/:id', async (req, res) => {
   try {
     const { id } = req.params;

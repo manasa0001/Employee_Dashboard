@@ -1,7 +1,8 @@
 
 import React, { useEffect, useState } from "react";
-import TopHeader from "../components/TopHeader";
-import Sidebar from "../components/Sidebar";
+import TopHeader from '../components/Employee_Components/TopHeader'; 
+import Sidebar from '../components/Employee_Components/Sidebar'; 
+
 import axios from "axios";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";

@@ -2,11 +2,9 @@ import express from "express";
 import multer from "multer";
 import path from "path";
 import mongoose from "mongoose"; // ✅ Added this import
-import EmployeeTask from "../models/EmployeeTask.js";
-import TaskUpdate from "../models/EmployeeTaskUpdates.js";
-import ActivityModel from "../models/Activity.js"; // <-- Make sure this path is correct
-
-
+import EmployeeTask from "../../models/employee_models/EmployeeTask.js";
+import TaskUpdate from "../../models/employee_models/EmployeeTaskUpdates.js";
+import ActivityModel from "../../models/employee_models/Activity.js"; // <-- Make sure this path is correct
 const router = express.Router();
 
 // Multer storage setup remains the same

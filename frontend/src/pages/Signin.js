@@ -59,7 +59,6 @@ const Signin = () => {
       alert(err.response?.data?.error || 'Something went wrong');
     }
   };
-
   return (
     <div className="w-screen h-screen overflow-x-hidden bg-gradient-to-r from-blue-950 to-blue-950 flex flex-col items-center justify-start">
       {/* Header */}
